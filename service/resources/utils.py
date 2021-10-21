@@ -141,7 +141,7 @@ def get_pdf_template(file_url):
     chunk_size = 2000
     ts = time.time()
     #template_pdf = os.path.dirname(__file__) + '/template/tmp_' + str(ts) + '.pdf'
-    template_pdf = os.path.dirname(__file__) + '/filled/solar_pdf.pdf'
+    template_pdf = os.path.dirname(__file__) + '/filled/SolarPanelTemplate.pdf'
     try:
         with open(template_pdf, 'wb') as fd:
             for chunk in r.iter_content(chunk_size):
