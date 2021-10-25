@@ -21,7 +21,7 @@ class PDFGenerator():
             if template_file:
                 basename = os.path.dirname(__file__)
                 output_pdf = utils.write_fillable_pdf(basename, data['request']['data'], template_file)
-                with open(output_pdf, 'r') as fd:
+                with open(output_pdf, 'rb') as fd:
                     pdf = fd.read()
                     resp.body = pdf
                     fd.close()
