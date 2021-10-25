@@ -14,21 +14,32 @@ class PDFGenerator():
     def on_post(self, req, resp):
         """ Implement POST """
         # pylint: disable=broad-except,no-member
-        template_pdf = ''
+        output_pdf = ''
         try:
             data = json.loads(req.bounded_stream.read())
             template_file = req.get_header('TEMPLATE_FILE')
             if template_file:
-                template_pdf = utils.get_pdf_template(template_file)
-                pdf_keys = utils.get_pdf_keys(template_pdf)
-                utils.write_fillable_pdf(template_pdf, data['request']['data'], pdf_keys)
-
+                basename = os.path.dirname(__file__)
+                output_pdf = utils.write_fillable_pdf(basename, data['request']['data'], template_file)
+                with open(output_pdf, 'r') as fd:
+                    pdf = fd.read()
+                    resp.body = pdf
+                    fd.close()
+        except ValueError as value_error:
+            print(f"Failed to merge form data: {value_error}")
+            print(traceback.format_exc())
+            resp.status = falcon.HTTP_500   # pylint: disable=no-member
+            resp.text = json.dumps(str(value_error))
+        except IOError as io_error:
+            print(f"Failed to read PDF template: {io_error}")
+            print(traceback.format_exc())
+            resp.status = falcon.HTTP_500   # pylint: disable=no-member
+            resp.text = json.dumps(str(io_error))
         except Exception as error:
             print(f"Failed to generate PDF: {error}")
             print(traceback.format_exc())
             resp.status = falcon.HTTP_500   # pylint: disable=no-member
             resp.text = json.dumps(str(error))
-        finally: # done with the temp file
-            print("done")
-            #os.remove(template_pdf)
+        finally: # clean up
+            os.remove(output_pdf)
 
