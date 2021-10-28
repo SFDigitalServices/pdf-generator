@@ -1,6 +1,5 @@
 import os
 import requests
-import traceback
 import time
 import pdfrw
 
@@ -112,6 +111,7 @@ def radio_button(annotation, data_dict):
             for data_key in data_dict:
                 if key == data_key:
                     annotation.update(pdfrw.PdfDict(V=pdfrw.objects.pdfname.BasePdfName(f'/{value}')))
+                    annotation[PARENT_KEY].update(pdfrw.PdfDict(V=pdfrw.objects.pdfname.BasePdfName(f'/{value}')))
     else:
         raise KeyError(f"Value: {value} Not Found")
 
@@ -186,7 +186,7 @@ def get_pdf_template(basename, file_url):
     chunk_size = 2000
     ts = time.time()
     template_pdf = os.path.join(basename, 'template/tmp_' + str(ts) + '.pdf')
-    #template_pdf = os.path.join(basename, 'filled/SolarPanelTemplate.pdf')
+    #template_pdf = os.path.join(basename, 'filled/SolarPanelTemplate2.pdf')
     #return template_pdf
     try:
         with open(template_pdf, 'wb') as fd:
@@ -194,7 +194,7 @@ def get_pdf_template(basename, file_url):
                 fd.write(chunk)
             fd.close()
             return template_pdf
-    except IOError as io_error:
+    except IOError:
         raise IOError
 
 def get_pdf_keys(template_pdf):
@@ -229,5 +229,4 @@ def get_pdf_keys(template_pdf):
                     keys[parent_key]['child'].append(field)
                 else:
                     continue
-    #print(keys)
     return keys

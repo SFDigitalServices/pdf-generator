@@ -1,4 +1,5 @@
 """PDf form def export module"""
+import os
 import json
 import traceback
 
@@ -14,7 +15,8 @@ class FormFieldDef():
         try:
             template_file = req.get_header('TEMPLATE_FILE')
             if template_file:
-                template_pdf = utils.get_pdf_template(template_file)
+                basename = basename = os.path.dirname(__file__)
+                template_pdf = utils.get_pdf_template(basename, template_file)
                 formfield_def = utils.get_pdf_keys(template_pdf)
                 print(formfield_def)
                 resp.text = json.dumps(formfield_def)
