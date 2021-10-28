@@ -18,9 +18,9 @@ class PDFGenerator():
         try:
             data = json.loads(req.bounded_stream.read())
             template_file = req.get_header('TEMPLATE_FILE')
-            if template_file:
+            if template_file and data:
                 basename = os.path.dirname(__file__)
-                output_pdf = utils.write_fillable_pdf(basename, data['request']['data'], template_file)
+                output_pdf = utils.write_fillable_pdf(basename, data, template_file)
                 with open(output_pdf, 'rb') as fd:
                     pdf = fd.read()
                     resp.body = pdf
@@ -41,5 +41,6 @@ class PDFGenerator():
             resp.status = falcon.HTTP_500   # pylint: disable=no-member
             resp.text = json.dumps(str(error))
         finally: # clean up
-            os.remove(output_pdf)
+            if len(output_pdf) > 1:
+                os.remove(output_pdf)
 
