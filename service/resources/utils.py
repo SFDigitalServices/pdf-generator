@@ -103,17 +103,15 @@ def radio_button(annotation, data_dict):
     else:
         key = annotation[ANNOT_FIELD_KEY].to_unicode()
 
-    value = ''
     if key in data_dict:
         value  = data_dict[key]
-
-    if '/N' in annotation['/AP']:
-        selected = annotation['/AP']['/N'].keys()[1].strip(('/'))
-        if selected == value:
-            for data_key in data_dict:
-                if key == data_key:
-                    annotation.update(pdfrw.PdfDict(V=pdfrw.objects.pdfname.BasePdfName(f'/{value}')))
-                    annotation[PARENT_KEY].update(pdfrw.PdfDict(V=pdfrw.objects.pdfname.BasePdfName(f'/{value}')))
+        if '/N' in annotation['/AP']:
+            selected = annotation['/AP']['/N'].keys()[1].strip(('/'))
+            if selected == value:
+                for data_key in data_dict:
+                    if key == data_key:
+                        annotation.update(pdfrw.PdfDict(V=pdfrw.objects.pdfname.BasePdfName(f'/{value}')))
+                        annotation[PARENT_KEY].update(pdfrw.PdfDict(V=pdfrw.objects.pdfname.BasePdfName(f'/{value}')))
     else:
         raise KeyError(f"Value: {value} Not Found")
 
