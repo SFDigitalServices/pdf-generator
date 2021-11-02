@@ -103,6 +103,7 @@ def radio_button(annotation, data_dict):
     else:
         key = annotation[ANNOT_FIELD_KEY].to_unicode()
 
+    value = ''
     if key in data_dict:
         value  = data_dict[key]
         if '/N' in annotation['/AP']:
