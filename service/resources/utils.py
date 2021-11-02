@@ -103,7 +103,6 @@ def radio_button(annotation, data_dict):
     else:
         key = annotation[ANNOT_FIELD_KEY].to_unicode()
 
-    value = ''
     if key in data_dict:
         value  = data_dict[key]
         if '/N' in annotation['/AP']:
@@ -113,8 +112,6 @@ def radio_button(annotation, data_dict):
                     if key == data_key:
                         annotation.update(pdfrw.PdfDict(V=pdfrw.objects.pdfname.BasePdfName(f'/{value}')))
                         annotation[PARENT_KEY].update(pdfrw.PdfDict(V=pdfrw.objects.pdfname.BasePdfName(f'/{value}')))
-    else:
-        raise KeyError(f"Value: {value} Not Found")
 
 def checkbox(annotation, data_dict, key):
     """
@@ -133,8 +130,6 @@ def checkbox(annotation, data_dict, key):
             annotation.update(pdfrw.PdfDict(
                 AS=pdfrw.PdfName('Yes')))
             annotation.update(pdfrw.PdfDict(AP=''))
-    if value is None:
-        raise KeyError(f"Value: {value} Not Found")
 
 def combobox(annotation, value):
     """
