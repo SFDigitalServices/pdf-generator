@@ -58,7 +58,6 @@ def merge_pdf(input_pdf_path, output_pdf_path, data_dict):
         pdfrw.PdfWriter().write(output_pdf_path, template_pdf)
         return output_pdf_path
     else:
-        #os.remove(input_pdf_path)
         raise ValueError(f"Error reading pdf template")
 
 def fill_field(annotation, data_dict, key):
@@ -104,7 +103,10 @@ def radio_button(annotation, data_dict):
     else:
         key = annotation[ANNOT_FIELD_KEY].to_unicode()
 
-    value  = data_dict[key]
+    value = ''
+    if key in data_dict:
+        value  = data_dict[key]
+
     if '/N' in annotation['/AP']:
         selected = annotation['/AP']['/N'].keys()[1].strip(('/'))
         if selected == value:
@@ -186,8 +188,6 @@ def get_pdf_template(basename, file_url):
     chunk_size = 2000
     ts = time.time()
     template_pdf = os.path.join(basename, 'template/tmp_' + str(ts) + '.pdf')
-    #template_pdf = os.path.join(basename, 'filled/SolarPanelTemplate2.pdf')
-    #return template_pdf
     try:
         with open(template_pdf, 'wb') as fd:
             for chunk in r.iter_content(chunk_size):
