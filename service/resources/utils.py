@@ -24,7 +24,7 @@ def write_fillable_pdf(basename, data_dict, file_url):
         output_pdf_path = os.path.join(basename, 'filled/output_' + str(ts) + '.pdf')
         input_pdf_path = get_pdf_template(basename, file_url)
         merge_pdf(input_pdf_path, output_pdf_path, data_dict)
-        os.remove(input_pdf_path) # done with template, remove it
+        #os.remove(input_pdf_path) # done with template, remove it
         return output_pdf_path
     except ValueError:
         raise
@@ -72,10 +72,10 @@ def fill_field(annotation, data_dict, key):
         annotation.update(pdfrw.PdfDict(AP=''))
     if ft == '/Ch':
         if ff and int(ff) & 1 << 17:  # test 18th bit
-            listbox(annotation, data_dict[key])
-        else:
             combobox(annotation, data_dict[key])
             annotation.update(pdfrw.PdfDict(AP=''))
+        else:
+            listbox(annotation, data_dict[key])
     if ft == '/Btn':
         if ff and int(ff) & 1 << 15:  # test 16th bit
             radio_button(annotation, data_dict) #non-grouped radios
@@ -130,6 +130,8 @@ def checkbox(annotation, data_dict, key):
             annotation.update(pdfrw.PdfDict(
                 AS=pdfrw.PdfName('Yes')))
             annotation.update(pdfrw.PdfDict(AP=''))
+    if value is None:
+        raise KeyError(f"Value: {value} Not Found")
 
 def combobox(annotation, value):
     """
@@ -139,7 +141,6 @@ def combobox(annotation, value):
         listbox(annotation, value)
     else:
         export=None
-        value = pdfrw.objects.pdfstring.PdfString.encode(str(value))
         for each in annotation['/Opt']:
             if type(each) is list:
                 if each[1].to_unicode()==value:
@@ -148,7 +149,8 @@ def combobox(annotation, value):
                 export = value
         if export is None:
             raise KeyError(f"Value: {value} Not Found")
-        annotation.update(pdfrw.PdfDict(V=value, AS=value))
+        pdfstr = pdfrw.objects.pdfstring.PdfString.encode(export)
+        annotation.update(pdfrw.PdfDict(V=pdfstr, AS=pdfstr))
 
 def listbox(annotation, values):
     """
