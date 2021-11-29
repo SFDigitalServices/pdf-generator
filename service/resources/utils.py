@@ -19,46 +19,44 @@ def write_fillable_pdf(basename, data_dict, file_url):
     Generates a read-only PDF
     '''
     # Merge it with the original PDF
-    try:
-        ts = time.time()
-        output_pdf_path = os.path.join(basename, 'filled/output_' + str(ts) + '.pdf')
-        input_pdf_path = get_pdf_template(basename, file_url)
-        merge_pdf(input_pdf_path, output_pdf_path, data_dict)
-        #os.remove(input_pdf_path) # done with template, remove it
-        return output_pdf_path
-    except ValueError:
-        raise
+    ts = time.time()
+    output_pdf_path = os.path.join(basename, 'filled/output_' + str(ts) + '.pdf')
+    input_pdf_path = get_pdf_template(basename, file_url)
+    merge_pdf(input_pdf_path, output_pdf_path, data_dict)
+    #os.remove(input_pdf_path) # done with template, remove it
+    return output_pdf_path
 
 def merge_pdf(input_pdf_path, output_pdf_path, data_dict):
     """
     Combine data with pdf tempate
     """
-    template_pdf = pdfrw.PdfReader(input_pdf_path)
-    if template_pdf:
-        for page in template_pdf.pages:
-            annotations = page[ANNOT_KEY]
-            if annotations:
-                for annotation in annotations:
-                    # only form fields matter
-                    if annotation[SUBTYPE_KEY] == WIDGET_SUBTYPE_KEY:
-                        # check for grouped radios
-                        if annotation['/AS'] and annotation[PARENT_KEY] \
-                            and annotation[PARENT_KEY][ANNOT_FIELD_TYPE] == '/Btn':
-                            radio_button(annotation,  data_dict)
-                        elif annotation[ANNOT_FIELD_KEY]:
-                            key = annotation[ANNOT_FIELD_KEY].to_unicode()
-                            if key_in_data_dict(key,data_dict):
-                                try:
-                                    fill_field(annotation, data_dict, key)
-                                except KeyError:
-                                    continue
-                        #else some fields don't need to be filled
+    try:
+        template_pdf = pdfrw.PdfReader(input_pdf_path)
+        if template_pdf:
+            for page in template_pdf.pages:
+                annotations = page[ANNOT_KEY]
+                if annotations:
+                    for annotation in annotations:
+                        # only form fields matter
+                        if annotation[SUBTYPE_KEY] == WIDGET_SUBTYPE_KEY:
+                            # check for grouped radios
+                            if annotation['/AS'] and annotation[PARENT_KEY] \
+                                and annotation[PARENT_KEY][ANNOT_FIELD_TYPE] == '/Btn':
+                                radio_button(annotation,  data_dict)
+                            elif annotation[ANNOT_FIELD_KEY]:
+                                key = annotation[ANNOT_FIELD_KEY].to_unicode()
+                                if key_in_data_dict(key,data_dict):
+                                    try:
+                                        fill_field(annotation, data_dict, key)
+                                    except KeyError:
+                                        continue
+                            #else some fields don't need to be filled
 
-        template_pdf.Root.AcroForm.update(pdfrw.PdfDict(NeedAppearances=pdfrw.PdfObject('true')))
-        pdfrw.PdfWriter().write(output_pdf_path, template_pdf)
-        return output_pdf_path
-    else:
-        raise ValueError(f"Error reading pdf template")
+            template_pdf.Root.AcroForm.update(pdfrw.PdfDict(NeedAppearances=pdfrw.PdfObject('true')))
+            pdfrw.PdfWriter().write(output_pdf_path, template_pdf)
+            return output_pdf_path
+    except pdfrw.errors.PdfParseError as pdf_error:
+        raise ValueError(f"Error reading pdf template: {pdf_error}")
 
 def fill_field(annotation, data_dict, key):
     """
@@ -127,9 +125,8 @@ def checkbox(annotation, data_dict, key):
                 if v_k==key:
                     value = data_dict[k][v_k]
         if value:
-            annotation.update(pdfrw.PdfDict(
-                AS=pdfrw.PdfName('Yes')))
-            annotation.update(pdfrw.PdfDict(AP=''))
+            annotation.update(pdfrw.PdfDict(V=pdfrw.objects.pdfname.BasePdfName('/Yes'),
+            AS=pdfrw.objects.pdfname.BasePdfName('/Yes') ))
     if value is None:
         raise KeyError(f"Value: {value} Not Found")
 
@@ -137,6 +134,7 @@ def combobox(annotation, value):
     """
     Set Drop Downs
     """
+    print(value)
     if type(value) is list:
         listbox(annotation, value)
     else:
@@ -149,7 +147,7 @@ def combobox(annotation, value):
                 export = value
         if export is None:
             raise KeyError(f"Value: {value} Not Found")
-        pdfstr = pdfrw.objects.pdfstring.PdfString.encode(export)
+        pdfstr = pdfrw.objects.pdfstring.PdfString.encode(str(export))
         annotation.update(pdfrw.PdfDict(V=pdfstr, AS=pdfstr))
 
 def listbox(annotation, values):
