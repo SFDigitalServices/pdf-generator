@@ -1,0 +1,20 @@
+{
+   "Name":"Property Owner",
+   "Address":"property address",
+   "selectBoxes":{
+      "1":true,
+      "2":true,
+      "3":false
+   },
+   "Dropdown1":2,
+   "multiSelect": ["1", "2"],
+   "SingleCheckBox":true,
+   "Group6":"Choice1",
+   "rb1":"yes",
+   "ListBox":{
+      "A":false,
+      "C-10":true,
+      "C-46":true,
+      "Other":true
+   }
+}

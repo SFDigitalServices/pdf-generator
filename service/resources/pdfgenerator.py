@@ -23,7 +23,7 @@ class PDFGenerator():
                 output_pdf = utils.write_fillable_pdf(basename, data, template_file)
                 with open(output_pdf, 'rb') as fd:
                     pdf = fd.read()
-                    resp.body = pdf
+                    resp.text = pdf
                     fd.close()
         except ValueError as value_error:
             print(f"Failed to merge form data: {value_error}")
