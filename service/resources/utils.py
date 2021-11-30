@@ -124,9 +124,12 @@ def checkbox(annotation, data_dict, key):
             for v_k in data_dict[k]:
                 if v_k==key:
                     value = data_dict[k][v_k]
-        if value:
-            annotation.update(pdfrw.PdfDict(V=pdfrw.objects.pdfname.BasePdfName('/Yes'),
-            AS=pdfrw.objects.pdfname.BasePdfName('/Yes') ))
+        if value and '/N' in annotation['/AP']:
+            keys = annotation['/AP']['/N'].keys()
+            if '/Off' in keys:
+                keys.remove('/Off')
+            export = keys[0]
+            annotation.update(pdfrw.PdfDict(V=export, AS=export))
     if value is None:
         raise KeyError(f"Value: {value} Not Found")
 
@@ -134,7 +137,6 @@ def combobox(annotation, value):
     """
     Set Drop Downs
     """
-    print(value)
     if type(value) is list:
         listbox(annotation, value)
     else:
