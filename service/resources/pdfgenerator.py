@@ -25,16 +25,6 @@ class PDFGenerator():
                     pdf = fd.read()
                     resp.text = pdf
                     fd.close()
-        except ValueError as value_error:
-            print(f"Failed to merge form data: {value_error}")
-            print(traceback.format_exc())
-            resp.status = falcon.HTTP_500   # pylint: disable=no-member
-            resp.text = json.dumps(str(value_error))
-        except IOError as io_error:
-            print(f"Failed to read PDF template: {io_error}")
-            print(traceback.format_exc())
-            resp.status = falcon.HTTP_500   # pylint: disable=no-member
-            resp.text = json.dumps(str(io_error))
         except Exception as error:
             print(f"Failed to generate PDF: {error}")
             print(traceback.format_exc())

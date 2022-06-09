@@ -55,15 +55,6 @@ def test_welcome_no_access_key(client, mock_env_no_access_key):
     response = client.simulate_get('/welcome')
     assert response.status_code == 403
 
-def test_default_error(client, mock_env_access_key):
-    # pylint: disable=unused-argument
-    """Test default error response"""
-    response = client.simulate_get('/some_page_that_does_not_exist')
-
-    assert response.status_code == 404
-    expected_msg_error = json.loads(response.content)
-    assert expected_msg_error == {'title': '404 Not Found'}
-
 def test_pdfgenerator_post(mock_env_access_key, client):
     # pylint: disable=unused-argument
     """
@@ -89,6 +80,7 @@ def test_pdfgenerator_post(mock_env_access_key, client):
         headers={"TEMPLATE_FILE": "https://sfdsoewd.blob.core.usgovcloudapi.net/uploads/solarpanel/SolarPanelTemplate3.pdf"}
     )
     assert response.status_code == 500
+
 
 def test_formfields_get(client):
     # pylint: disable=unused-argument

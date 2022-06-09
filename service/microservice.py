@@ -21,10 +21,3 @@ def start_service():
     api.add_route('/get-formfield-definition', FormFieldDef())
     return api
 
-def default_error(_req, resp):
-    """Handle default error"""
-    resp.status = falcon.HTTP_404
-    msg_error = jsend.error('404 - Not Found')
-
-    sentry_sdk.capture_message(msg_error)
-    resp.text = json.dumps(msg_error)

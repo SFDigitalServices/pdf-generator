@@ -22,6 +22,7 @@ def write_fillable_pdf(basename, data_dict, file_url):
     ts = time.time()
     output_pdf_path = os.path.join(basename, 'filled/output_' + str(ts) + '.pdf')
     input_pdf_path = get_pdf_template(basename, file_url)
+    #input_pdf_path = os.path.join(basename, 'template/SolarPanelTemplateTest.pdf')
     merge_pdf(input_pdf_path, output_pdf_path, data_dict)
     #os.remove(input_pdf_path) # done with template, remove it
     return output_pdf_path
@@ -46,17 +47,14 @@ def merge_pdf(input_pdf_path, output_pdf_path, data_dict):
                             elif annotation[ANNOT_FIELD_KEY]:
                                 key = annotation[ANNOT_FIELD_KEY].to_unicode()
                                 if key_in_data_dict(key,data_dict):
-                                    try:
-                                        fill_field(annotation, data_dict, key)
-                                    except KeyError:
-                                        continue
+                                    fill_field(annotation, data_dict, key)
                             #else some fields don't need to be filled
 
             template_pdf.Root.AcroForm.update(pdfrw.PdfDict(NeedAppearances=pdfrw.PdfObject('true')))
             pdfrw.PdfWriter().write(output_pdf_path, template_pdf)
             return output_pdf_path
     except pdfrw.errors.PdfParseError as pdf_error:
-        raise ValueError(f"Error reading pdf template: {pdf_error}")
+        raise Exception(f"Error reading pdf template: {pdf_error}")
 
 def fill_field(annotation, data_dict, key):
     """
@@ -72,8 +70,8 @@ def fill_field(annotation, data_dict, key):
         if ff and int(ff) & 1 << 17:  # test 18th bit
             combobox(annotation, data_dict[key])
             annotation.update(pdfrw.PdfDict(AP=''))
-        else:
-            listbox(annotation, data_dict[key])
+        #else:
+            #listbox(annotation, data_dict[key])
     if ft == '/Btn':
         if ff and int(ff) & 1 << 15:  # test 16th bit
             radio_button(annotation, data_dict) #non-grouped radios
@@ -130,32 +128,25 @@ def checkbox(annotation, data_dict, key):
                 keys.remove('/Off')
             export = keys[0]
             annotation.update(pdfrw.PdfDict(V=export, AS=export))
-    if value is None:
-        raise KeyError(f"Value: {value} Not Found")
 
 def combobox(annotation, value):
     """
     Set Drop Downs
     """
-    if type(value) is list:
-        listbox(annotation, value)
-    else:
-        export=None
-        for each in annotation['/Opt']:
-            if type(each) is list:
-                if each[1].to_unicode()==value:
-                    export = each[0].to_unicode()
-            else:
-                export = value
-        if export is None:
-            raise KeyError(f"Value: {value} Not Found")
-        pdfstr = pdfrw.objects.pdfstring.PdfString.encode(str(export))
-        annotation.update(pdfrw.PdfDict(V=pdfstr, AS=pdfstr))
+    export=None
+    print(annotation['/Opt'])
+    for each in annotation['/Opt']:
+        if each.to_unicode()==str(value):
+            export = each.to_unicode()
+    pdfstr = pdfrw.objects.pdfstring.PdfString.encode(str(export))
+    annotation.update(pdfrw.PdfDict(V=pdfstr, AS=pdfstr))
 
+'''
 def listbox(annotation, values):
     """
     Set multiple selections
     """
+    print(annotation)
     pdfstrs=[]
     for value in values:
         export=None
@@ -165,10 +156,10 @@ def listbox(annotation, values):
                     export = each[1].to_unicode()
             elif each.to_unicode()==str(value):
                 export = each.to_unicode()
-        if export is None:
-            raise KeyError(f"Value: {value} Not Found")
         pdfstrs.append(pdfrw.objects.pdfstring.PdfString.encode(export))
+
     annotation.update(pdfrw.PdfDict(V=pdfstrs, AS=pdfstrs))
+'''
 
 def text_form(annotation, pdfstr):
     """
@@ -190,8 +181,8 @@ def get_pdf_template(basename, file_url):
                 fd.write(chunk)
             fd.close()
             return template_pdf
-    except IOError:
-        raise IOError
+    except Exception:
+        raise Exception
 
 def get_pdf_keys(template_pdf):
     """
@@ -223,6 +214,4 @@ def get_pdf_keys(template_pdf):
                         keys[parent_key]['parentkey'] = annotation[PARENT_KEY][ANNOT_FIELD_KEY]
 
                     keys[parent_key]['child'].append(field)
-                else:
-                    continue
     return keys

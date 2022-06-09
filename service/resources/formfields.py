@@ -17,6 +17,7 @@ class FormFieldDef():
             if template_file:
                 basename = basename = os.path.dirname(__file__)
                 template_pdf = utils.get_pdf_template(basename, template_file)
+                #template_pdf = os.path.join(basename, 'template/SolarPanelTemplateTest1.pdf')
                 formfield_def = utils.get_pdf_keys(template_pdf)
                 resp.text = json.dumps(formfield_def)
             else:
