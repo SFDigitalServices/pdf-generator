@@ -17,14 +17,17 @@ class FormFieldDef():
             if template_file:
                 basename = basename = os.path.dirname(__file__)
                 template_pdf = utils.get_pdf_template(basename, template_file)
+                #template_pdf = os.path.join(basename, 'template/SolarPanelTemplateTest1.pdf')
                 formfield_def = utils.get_pdf_keys(template_pdf)
-                print(formfield_def)
                 resp.text = json.dumps(formfield_def)
+            else:
+                raise Exception
 
         except Exception as error:
-            print(f"Failed to generate PDF: {error}")
+            print(f"Failed get form field definition: {error}")
             print(traceback.format_exc())
             resp.text = json.dumps(str(error))
+            resp.status = 500
         finally: # done with the temp file
             resp.text = json.dumps(formfield_def)
 
